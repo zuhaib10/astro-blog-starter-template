@@ -28,6 +28,17 @@ export function windowMinutesLeft(lastInboundAt: string | null): number {
   return Math.max(0, Math.round(24 * 60 - elapsedMin));
 }
 
+// Single source of truth for the 24h window state. Derive from the live
+// timestamp so the banner and composer can never disagree; fall back to the
+// server-provided flag only when no timestamp is available.
+export function isWindowOpen(
+  lastInboundAt: string | null,
+  fallback = false,
+): boolean {
+  if (!lastInboundAt) return fallback;
+  return windowMinutesLeft(lastInboundAt) > 0;
+}
+
 // "1h 12m" countdown label.
 export function countdownLabel(minutesLeft: number): string {
   const h = Math.floor(minutesLeft / 60);

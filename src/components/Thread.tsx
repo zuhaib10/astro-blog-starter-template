@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Template, Thread as ThreadData, ThreadMessage } from "../types";
 import { fetchThread, sendReply } from "../api";
-import { timeLabel } from "../format";
+import { isWindowOpen, timeLabel } from "../format";
 import Composer from "./Composer";
 import TemplateSheet from "./TemplateSheet";
 
@@ -86,6 +86,13 @@ export default function Thread({
     }
   }
 
+  // Auto-dismiss the error toast.
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   if (loading || !thread) {
     return (
       <div className="thread">
@@ -99,6 +106,8 @@ export default function Thread({
   }
 
   const { conversation, messages } = thread;
+  // One derived window state for both the banner and the composer.
+  const windowOpen = isWindowOpen(conversation.lastInboundAt, conversation.windowOpen);
 
   return (
     <div className="thread">
@@ -115,8 +124,8 @@ export default function Thread({
         </div>
       </header>
 
-      <div className={`window-banner ${conversation.windowOpen ? "open" : "closed"}`}>
-        {conversation.windowOpen
+      <div className={`window-banner ${windowOpen ? "open" : "closed"}`}>
+        {windowOpen
           ? "Reply window open — free replies allowed"
           : "Window closed — only approved templates can be sent"}
       </div>
@@ -143,13 +152,13 @@ export default function Thread({
       </div>
 
       {toast && (
-        <div className="toast" onClick={() => setToast(null)}>
+        <div className="toast" role="alert" onClick={() => setToast(null)}>
           {toast}
         </div>
       )}
 
       <Composer
-        windowOpen={conversation.windowOpen}
+        windowOpen={windowOpen}
         lastInboundAt={conversation.lastInboundAt}
         sending={sending}
         onSend={(t) => deliver({ text: t }, t)}
@@ -162,7 +171,7 @@ export default function Thread({
         onClose={() => setSheetOpen(false)}
         onPick={(name) => {
           setSheetOpen(false);
-          deliver({ template: name }, `📋 ${name}`);
+          deliver({ template: name }, `Template sent: ${name}`);
         }}
       />
     </div>

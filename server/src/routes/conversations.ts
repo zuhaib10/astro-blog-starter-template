@@ -122,7 +122,7 @@ conversationsRouter.post("/conversations/:id/messages", async (req, res, next) =
     }
 
     const to = c.wa_id ?? c.phone.replace(/[^\d]/g, "");
-    const body = template ? `📋 ${template}` : text;
+    const body = template ? `Template sent: ${template}` : text;
     let waId: string | null = null;
     let status = "sent";
 

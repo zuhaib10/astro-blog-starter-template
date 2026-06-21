@@ -31,6 +31,9 @@ export default function NavTabs({
             key={t.id}
             className={`nav-item ${active === t.id ? "active" : ""}`}
             aria-current={active === t.id ? "page" : undefined}
+            aria-label={
+              t.id === "chats" && unread > 0 ? `Chats, ${unread} unread` : t.label
+            }
             onClick={() => onChange(t.id)}
           >
             <span className="nav-ico" aria-hidden="true">

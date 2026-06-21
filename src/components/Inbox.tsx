@@ -21,7 +21,14 @@ export default function Inbox({
   source: "live" | "demo";
 }) {
   const waiting = conversations.filter((c) => c.unread > 0);
-  const list = filter === "waiting" ? waiting : conversations;
+  const base = filter === "waiting" ? waiting : conversations;
+  // Longest-waiting first: unanswered on top, then by wait time descending.
+  const list = [...base].sort((a, b) => {
+    const aw = a.unread > 0 ? 1 : 0;
+    const bw = b.unread > 0 ? 1 : 0;
+    if (aw !== bw) return bw - aw;
+    return (b.waitMinutes ?? 0) - (a.waitMinutes ?? 0);
+  });
 
   return (
     <div className="inbox">
@@ -32,18 +39,16 @@ export default function Inbox({
             {source === "live" ? "Connected" : "Demo"}
           </span>
         </div>
-        <div className="segmented" role="tablist" aria-label="Filter conversations">
+        <div className="segmented" role="group" aria-label="Filter conversations">
           <button
-            role="tab"
-            aria-selected={filter === "waiting"}
+            aria-pressed={filter === "waiting"}
             className={filter === "waiting" ? "active" : ""}
             onClick={() => onFilter("waiting")}
           >
             Waiting{waiting.length > 0 ? ` · ${waiting.length}` : ""}
           </button>
           <button
-            role="tab"
-            aria-selected={filter === "all"}
+            aria-pressed={filter === "all"}
             className={filter === "all" ? "active" : ""}
             onClick={() => onFilter("all")}
           >

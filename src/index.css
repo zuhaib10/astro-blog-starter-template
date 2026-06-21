@@ -240,6 +240,7 @@ button {
   border: 0;
   background: transparent;
   padding: 7px 16px;
+  min-height: 44px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
@@ -332,13 +333,23 @@ button {
   background: #eef1f3;
   color: var(--muted);
 }
+/* Escalation is not color-only: warn/danger add a border, danger adds a marker. */
 .wait-chip.warn {
   background: var(--amber-bg);
   color: var(--amber);
+  border: 1px solid #f0c869;
 }
 .wait-chip.danger {
   background: #fde2e1;
   color: var(--danger);
+  border: 1px solid #e9a3a0;
+  font-weight: 700;
+}
+.wait-chip.danger::before {
+  content: "●";
+  font-size: 8px;
+  vertical-align: middle;
+  margin-right: 4px;
 }
 .badge {
   flex-shrink: 0;
@@ -424,6 +435,7 @@ button {
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 .thread-head {
   display: flex;
@@ -703,6 +715,8 @@ button {
   font-size: 16px;
   color: var(--muted);
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
 }
 .sheet-note {
   margin: 4px 0 12px;

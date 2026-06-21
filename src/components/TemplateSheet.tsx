@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { Template } from "../types";
 
 export default function TemplateSheet({
@@ -11,6 +12,19 @@ export default function TemplateSheet({
   onClose: () => void;
   onPick: (name: string) => void;
 }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  // Move focus into the sheet on open and close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
@@ -18,13 +32,14 @@ export default function TemplateSheet({
       <div
         className="sheet"
         role="dialog"
+        aria-modal="true"
         aria-label="Choose a template"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sheet-grab" aria-hidden="true" />
         <div className="sheet-head">
           <h3>Send a template</h3>
-          <button className="sheet-close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} className="sheet-close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>

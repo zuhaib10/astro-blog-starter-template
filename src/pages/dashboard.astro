@@ -1,0 +1,377 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+
+// --- Mock data (swap for a real WhatsApp Business / Cloud API source later) ---
+const stats = [
+	{ label: 'Total Conversations', value: '1,284', delta: '+12.4%', up: true },
+	{ label: 'Messages Sent', value: '8,932', delta: '+8.1%', up: true },
+	{ label: 'Delivery Rate', value: '97.6%', delta: '+0.9%', up: true },
+	{ label: 'Avg. Response Time', value: '2m 14s', delta: '-18s', up: true },
+];
+
+const weekly = [
+	{ day: 'Mon', sent: 980, read: 720 },
+	{ day: 'Tue', sent: 1240, read: 980 },
+	{ day: 'Wed', sent: 1100, read: 860 },
+	{ day: 'Thu', sent: 1430, read: 1180 },
+	{ day: 'Fri', sent: 1680, read: 1390 },
+	{ day: 'Sat', sent: 920, read: 640 },
+	{ day: 'Sun', sent: 580, read: 410 },
+];
+const maxSent = Math.max(...weekly.map((d) => d.sent));
+
+const conversations = [
+	{ name: 'Aisha Khan', phone: '+92 300 1234567', preview: 'Thanks! Order confirmed ✅', time: '2m', unread: 0, status: 'read' },
+	{ name: 'Bilal Traders', phone: '+92 321 9876543', preview: 'Can you share the catalogue?', time: '11m', unread: 3, status: 'delivered' },
+	{ name: 'Sara Malik', phone: '+92 333 4455667', preview: 'Is COD available in Lahore?', time: '34m', unread: 1, status: 'delivered' },
+	{ name: 'Hamza Store', phone: '+92 345 1122334', preview: 'Invoice sent. Awaiting payment', time: '1h', unread: 0, status: 'sent' },
+	{ name: 'Nida Fatima', phone: '+92 301 7788990', preview: 'Great service, will order again!', time: '3h', unread: 0, status: 'read' },
+];
+
+const templates = [
+	{ name: 'order_confirmation', category: 'Utility', language: 'en', status: 'Approved' },
+	{ name: 'shipping_update', category: 'Utility', language: 'en', status: 'Approved' },
+	{ name: 'eid_promo_2026', category: 'Marketing', language: 'ur', status: 'Pending' },
+	{ name: 'feedback_request', category: 'Utility', language: 'en', status: 'Approved' },
+	{ name: 'cart_reminder', category: 'Marketing', language: 'en', status: 'Rejected' },
+];
+
+const tick = (s: string) =>
+	s === 'read' ? '✓✓' : s === 'delivered' ? '✓✓' : '✓';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead
+			title="WhatsApp Business Dashboard"
+			description="Overview of conversations, message delivery and templates for your WhatsApp Business account."
+		/>
+	</head>
+	<body>
+		<div class="layout">
+			<!-- Sidebar -->
+			<aside class="sidebar">
+				<div class="brand">
+					<span class="logo" aria-hidden="true">
+						<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+							<path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.97L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm5.8 14.16c-.25.69-1.45 1.32-1.99 1.36-.53.05-1.03.24-3.47-.72-2.92-1.15-4.78-4.13-4.93-4.32-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.26-.29.57-.36.76-.36.19 0 .38 0 .55.01.18.01.41-.07.64.49.25.61.84 2.03.91 2.18.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.17-.29.38-.42.5-.14.14-.28.29-.12.57.16.29.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.2.69-.81.87-1.08.18-.27.36-.23.61-.14.25.09 1.59.75 1.86.89.27.14.45.21.52.32.07.12.07.66-.18 1.35Z" />
+						</svg>
+					</span>
+					<div>
+						<strong>WA Business</strong>
+						<small>Dashboard</small>
+					</div>
+				</div>
+				<nav class="nav">
+					<a class="active" href="#"><span>📊</span> Overview</a>
+					<a href="#"><span>💬</span> Conversations</a>
+					<a href="#"><span>📨</span> Broadcasts</a>
+					<a href="#"><span>🧩</span> Templates</a>
+					<a href="#"><span>👥</span> Contacts</a>
+					<a href="#"><span>⚙️</span> Settings</a>
+				</nav>
+				<div class="account">
+					<div class="avatar">B</div>
+					<div>
+						<strong>Business Inc.</strong>
+						<small class="online">● Connected</small>
+					</div>
+				</div>
+			</aside>
+
+			<!-- Main -->
+			<main class="main">
+				<header class="topbar">
+					<div>
+						<h1>Overview</h1>
+						<p>Here's what's happening with your WhatsApp Business account today.</p>
+					</div>
+					<div class="topbar-actions">
+						<input class="search" type="search" placeholder="Search conversations…" />
+						<button class="btn">+ New broadcast</button>
+					</div>
+				</header>
+
+				<!-- KPI cards -->
+				<section class="cards">
+					{stats.map((s) => (
+						<div class="card">
+							<span class="card-label">{s.label}</span>
+							<span class="card-value">{s.value}</span>
+							<span class={`card-delta ${s.up ? 'up' : 'down'}`}>
+								{s.up ? '▲' : '▼'} {s.delta} <small>vs last week</small>
+							</span>
+						</div>
+					))}
+				</section>
+
+				<div class="grid">
+					<!-- Chart -->
+					<section class="panel chart-panel">
+						<div class="panel-head">
+							<h2>Messages this week</h2>
+							<div class="legend">
+								<span><i class="dot sent"></i> Sent</span>
+								<span><i class="dot read"></i> Read</span>
+							</div>
+						</div>
+						<div class="chart">
+							{weekly.map((d) => (
+								<div class="bar-col" title={`${d.day}: ${d.sent} sent / ${d.read} read`}>
+									<div class="bars">
+										<div class="bar sent" style={`height:${(d.sent / maxSent) * 100}%`}></div>
+										<div class="bar read" style={`height:${(d.read / maxSent) * 100}%`}></div>
+									</div>
+									<span class="bar-label">{d.day}</span>
+								</div>
+							))}
+						</div>
+					</section>
+
+					<!-- Conversations -->
+					<section class="panel">
+						<div class="panel-head">
+							<h2>Recent conversations</h2>
+							<a class="link" href="#">View all</a>
+						</div>
+						<ul class="convos">
+							{conversations.map((c) => (
+								<li class="convo">
+									<div class="convo-avatar">{c.name.charAt(0)}</div>
+									<div class="convo-body">
+										<div class="convo-row">
+											<strong>{c.name}</strong>
+											<span class="convo-time">{c.time}</span>
+										</div>
+										<div class="convo-row">
+											<span class="convo-preview">
+												<span class={`tick ${c.status}`}>{tick(c.status)}</span>
+												{c.preview}
+											</span>
+											{c.unread > 0 && <span class="badge">{c.unread}</span>}
+										</div>
+									</div>
+								</li>
+							))}
+						</ul>
+					</section>
+				</div>
+
+				<!-- Templates -->
+				<section class="panel">
+					<div class="panel-head">
+						<h2>Message templates</h2>
+						<a class="link" href="#">Manage</a>
+					</div>
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Category</th>
+								<th>Language</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{templates.map((t) => (
+								<tr>
+									<td class="mono">{t.name}</td>
+									<td>{t.category}</td>
+									<td class="upper">{t.language}</td>
+									<td>
+										<span class={`pill ${t.status.toLowerCase()}`}>{t.status}</span>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</section>
+
+				<footer class="foot">
+					Demo data. Connect the WhatsApp Cloud API to show live metrics.
+				</footer>
+			</main>
+		</div>
+
+		<style>
+			:root {
+				--wa-green: #25d366;
+				--wa-teal: #128c7e;
+				--wa-dark: #075e54;
+				--ink: #111b21;
+				--muted: #667781;
+				--line: #e9edef;
+				--bg: #f0f2f5;
+				--card: #ffffff;
+			}
+			* { box-sizing: border-box; }
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--ink);
+				font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+			}
+			.layout { display: flex; min-height: 100vh; }
+
+			/* Sidebar */
+			.sidebar {
+				width: 240px;
+				flex-shrink: 0;
+				background: var(--wa-dark);
+				color: #e9f5f1;
+				display: flex;
+				flex-direction: column;
+				padding: 18px 14px;
+				gap: 22px;
+			}
+			.brand { display: flex; align-items: center; gap: 10px; padding: 4px; }
+			.brand .logo {
+				display: grid; place-items: center;
+				width: 38px; height: 38px; border-radius: 10px;
+				background: var(--wa-green); color: #fff;
+			}
+			.brand strong { display: block; font-size: 15px; }
+			.brand small { color: #9fc9bf; }
+			.nav { display: flex; flex-direction: column; gap: 4px; }
+			.nav a {
+				display: flex; align-items: center; gap: 10px;
+				padding: 10px 12px; border-radius: 8px;
+				color: #cfe7e0; text-decoration: none; font-size: 14px;
+			}
+			.nav a:hover { background: rgba(255,255,255,.08); }
+			.nav a.active { background: var(--wa-green); color: #04362f; font-weight: 600; }
+			.account {
+				margin-top: auto; display: flex; align-items: center; gap: 10px;
+				padding: 10px; border-radius: 10px; background: rgba(255,255,255,.06);
+			}
+			.account .avatar {
+				width: 36px; height: 36px; border-radius: 50%;
+				background: var(--wa-green); color: #04362f;
+				display: grid; place-items: center; font-weight: 700;
+			}
+			.account strong { display: block; font-size: 13px; }
+			.account .online { color: var(--wa-green); font-size: 11px; }
+
+			/* Main */
+			.main { flex: 1; padding: 24px 28px; min-width: 0; }
+			.topbar {
+				display: flex; justify-content: space-between; align-items: flex-start;
+				gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
+			}
+			.topbar h1 { margin: 0; font-size: 24px; }
+			.topbar p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+			.topbar-actions { display: flex; gap: 10px; align-items: center; }
+			.search {
+				padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px;
+				background: #fff; font-size: 14px; min-width: 220px;
+			}
+			.btn {
+				padding: 9px 16px; border: 0; border-radius: 999px; cursor: pointer;
+				background: var(--wa-teal); color: #fff; font-size: 14px; font-weight: 600;
+			}
+			.btn:hover { background: var(--wa-dark); }
+
+			/* Cards */
+			.cards {
+				display: grid; grid-template-columns: repeat(4, 1fr);
+				gap: 16px; margin-bottom: 20px;
+			}
+			.card {
+				background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+				padding: 16px 18px; display: flex; flex-direction: column; gap: 6px;
+			}
+			.card-label { color: var(--muted); font-size: 13px; }
+			.card-value { font-size: 26px; font-weight: 700; }
+			.card-delta { font-size: 12px; font-weight: 600; }
+			.card-delta small { color: var(--muted); font-weight: 400; }
+			.card-delta.up { color: var(--wa-teal); }
+			.card-delta.down { color: #d9534f; }
+
+			/* Grid */
+			.grid {
+				display: grid; grid-template-columns: 1.4fr 1fr;
+				gap: 16px; margin-bottom: 20px;
+			}
+			.panel {
+				background: var(--card); border: 1px solid var(--line);
+				border-radius: 14px; padding: 18px;
+			}
+			.panel-head {
+				display: flex; justify-content: space-between; align-items: center;
+				margin-bottom: 14px;
+			}
+			.panel-head h2 { margin: 0; font-size: 16px; }
+			.link { color: var(--wa-teal); text-decoration: none; font-size: 13px; font-weight: 600; }
+			.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+			.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+			.dot.sent { background: var(--wa-green); }
+			.dot.read { background: var(--wa-teal); }
+
+			/* Chart */
+			.chart {
+				display: flex; align-items: flex-end; justify-content: space-between;
+				gap: 10px; height: 220px; padding-top: 8px;
+			}
+			.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+			.bars { flex: 1; display: flex; align-items: flex-end; gap: 4px; width: 100%; justify-content: center; }
+			.bar { width: 14px; border-radius: 6px 6px 0 0; }
+			.bar.sent { background: var(--wa-green); }
+			.bar.read { background: var(--wa-teal); }
+			.bar-label { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+			/* Conversations */
+			.convos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+			.convo { display: flex; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+			.convo:last-child { border-bottom: 0; }
+			.convo-avatar {
+				width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%;
+				background: var(--wa-teal); color: #fff; display: grid; place-items: center; font-weight: 600;
+			}
+			.convo-body { flex: 1; min-width: 0; }
+			.convo-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+			.convo-time { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+			.convo-preview {
+				color: var(--muted); font-size: 13px;
+				white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+			}
+			.tick { margin-right: 4px; }
+			.tick.read { color: #53bdeb; }
+			.tick.delivered, .tick.sent { color: var(--muted); }
+			.badge {
+				background: var(--wa-green); color: #04362f; font-size: 11px; font-weight: 700;
+				min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+				display: grid; place-items: center; flex-shrink: 0;
+			}
+
+			/* Table */
+			.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+			.table th {
+				text-align: left; color: var(--muted); font-weight: 600; font-size: 12px;
+				text-transform: uppercase; letter-spacing: .03em; padding: 8px 10px; border-bottom: 1px solid var(--line);
+			}
+			.table td { padding: 11px 10px; border-bottom: 1px solid var(--line); }
+			.table tr:last-child td { border-bottom: 0; }
+			.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+			.upper { text-transform: uppercase; }
+			.pill {
+				font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+			}
+			.pill.approved { background: #e0f5ec; color: var(--wa-dark); }
+			.pill.pending { background: #fff3d6; color: #946200; }
+			.pill.rejected { background: #fde2e1; color: #b3261e; }
+
+			.foot { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+
+			/* Responsive */
+			@media (max-width: 980px) {
+				.cards { grid-template-columns: repeat(2, 1fr); }
+				.grid { grid-template-columns: 1fr; }
+			}
+			@media (max-width: 720px) {
+				.sidebar { display: none; }
+				.main { padding: 18px 16px; }
+			}
+		</style>
+	</body>
+</html>

@@ -3,7 +3,7 @@ import cors from "cors";
 import { env, whatsappConfigured } from "./env.js";
 import { waitForDb } from "./db.js";
 import { overviewRouter } from "./routes/overview.js";
-import { messagesRouter } from "./routes/messages.js";
+import { conversationsRouter } from "./routes/conversations.js";
 import { webhookRouter } from "./routes/webhook.js";
 
 const app = express();
@@ -15,7 +15,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api", overviewRouter);
-app.use("/api", messagesRouter);
+app.use("/api", conversationsRouter);
 // Webhook lives at the root so the Meta callback URL is /webhook.
 app.use("/", webhookRouter);
 

@@ -1,12 +1,21 @@
 # Business WhatsApp Dashboard
 
-A WhatsApp Business analytics dashboard — conversations, message delivery,
-broadcasts and templates — built as a small full-stack app.
+An **inbox-first** WhatsApp Business app for SMB owners: see who's waiting,
+reply fast, and stay inside WhatsApp's rules. Built mobile-first as a small
+full-stack app.
 
-- **Frontend:** React + Vite + TypeScript (SPA, hand-rolled SVG charts, no chart lib)
-- **Backend:** Node + Express + TypeScript (REST API, WhatsApp Cloud API client, webhook)
-- **Database:** PostgreSQL
-- **Orchestration:** Docker Compose (db + api + web)
+Product direction (COO + Designer brief): the home screen is the **conversation
+inbox** (sorted longest-waiting-first), not a chart dashboard. KPIs live in a
+secondary **Insights** tab. The composer **enforces the 24-hour service window**
+— free text inside the window, approved templates only outside it.
+
+- **Frontend:** React + Vite + TypeScript — bottom-tab IA (Chats / Insights /
+  Settings), inbox + chat thread, 24h-window-aware composer, template bottom
+  sheet, hand-rolled SVG chart (no chart lib). Falls back to demo data offline.
+- **Backend:** Node + Express + TypeScript — REST API, WhatsApp Cloud API
+  client, webhook (verification + inbound/status ingestion).
+- **Database:** PostgreSQL (conversations, thread messages, templates, stats).
+- **Orchestration:** Docker Compose (db + api + web).
 
 ## Quick start (Docker)
 
@@ -62,13 +71,20 @@ inbound messages and delivery/read status updates into the `messages` table.
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `GET`  | `/api/health` | Liveness + whether WhatsApp is configured |
-| `GET`  | `/api/overview` | Stats, weekly chart, conversations, templates |
-| `POST` | `/api/messages` | Send a message: `{ to, body }` or `{ to, template, language }` |
+| `GET`  | `/api/conversations` | Inbox list, longest-waiting-first, with `windowOpen` + `waitMinutes` |
+| `GET`  | `/api/conversations/:id` | One conversation's thread (messages + window state) |
+| `POST` | `/api/conversations/:id/messages` | Reply: `{ text }` (within 24h window) or `{ template, language }` |
+| `GET`  | `/api/templates` | Templates with approval status |
+| `GET`  | `/api/overview` | Insights tab: KPI stats + weekly chart |
 | `GET`  | `/webhook` | Meta verification handshake |
-| `POST` | `/webhook` | Inbound messages + status callbacks |
+| `POST` | `/webhook` | Inbound messages + delivery/read status callbacks |
 
-If WhatsApp credentials are not set, `POST /api/messages` returns `503` and the
-dashboard runs purely on seed/demo data.
+**Window enforcement (server-side):** `POST /api/conversations/:id/messages`
+returns `409 window_closed` if you send free text outside the 24-hour window,
+and `409 template_not_approved` if the template isn't approved — the UI enforces
+the same rules, but the backend is the source of truth. When WhatsApp
+credentials are not set, sends are simulated against seed data so the UI stays
+fully usable.
 
 ## Project layout
 
@@ -78,9 +94,13 @@ dashboard runs purely on seed/demo data.
 ├── Dockerfile              # frontend (build -> nginx, proxies /api & /webhook)
 ├── nginx.conf
 ├── src/                    # React frontend
-│   ├── components/         # Sidebar, Topbar, StatCard, MessagesChart, ...
-│   ├── api.ts              # fetch overview (falls back to demo data)
-│   └── data.ts             # types + demo data
+│   ├── components/         # NavTabs, ChatsView, Inbox, ConversationRow,
+│   │                       # Thread, Composer, TemplateSheet, Insights,
+│   │                       # Settings, StatCard, MessagesChart
+│   ├── api.ts              # data fetching (falls back to demo data offline)
+│   ├── data.ts             # demo conversations / threads / templates
+│   ├── format.ts           # wait-time + 24h-window helpers
+│   └── types.ts            # shared types
 └── server/                 # Express backend
     ├── Dockerfile
     ├── db/init.sql         # schema + seed (auto-run by Postgres)
@@ -88,5 +108,5 @@ dashboard runs purely on seed/demo data.
         ├── index.ts        # app bootstrap
         ├── db.ts           # pg pool + startup wait
         ├── whatsapp.ts     # Cloud API client
-        └── routes/         # overview, messages, webhook
+        └── routes/         # overview, conversations, webhook
 ```

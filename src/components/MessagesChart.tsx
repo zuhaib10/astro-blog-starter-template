@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { DayPoint } from "../data";
+import type { DayPoint } from "../types";
 
 const W = 560;
 const H = 220;

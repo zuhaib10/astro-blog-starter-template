@@ -1,4 +1,4 @@
-import type { Stat } from "../data";
+import type { Stat } from "../types";
 
 export default function StatCard({ stat }: { stat: Stat }) {
   return (

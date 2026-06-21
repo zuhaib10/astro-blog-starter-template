@@ -1,8 +1,12 @@
-import { conversations, type MessageStatus } from "../data";
+import type { Conversation, MessageStatus } from "../data";
 
 const tick = (s: MessageStatus) => (s === "sent" ? "✓" : "✓✓");
 
-export default function Conversations() {
+export default function Conversations({
+  conversations,
+}: {
+  conversations: Conversation[];
+}) {
   return (
     <section className="panel" aria-label="Recent conversations">
       <div className="panel-head">

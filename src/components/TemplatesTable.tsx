@@ -1,6 +1,6 @@
-import { templates } from "../data";
+import type { Template } from "../data";
 
-export default function TemplatesTable() {
+export default function TemplatesTable({ templates }: { templates: Template[] }) {
   return (
     <section className="panel" aria-label="Message templates">
       <div className="panel-head">

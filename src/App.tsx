@@ -4,9 +4,11 @@ import StatCard from "./components/StatCard";
 import MessagesChart from "./components/MessagesChart";
 import Conversations from "./components/Conversations";
 import TemplatesTable from "./components/TemplatesTable";
-import { stats } from "./data";
+import { useOverview } from "./useOverview";
 
 export default function App() {
+  const { stats, weekly, conversations, templates, source } = useOverview();
+
   return (
     <>
       <a className="skip-link" href="#main">
@@ -24,14 +26,16 @@ export default function App() {
           </section>
 
           <div className="grid">
-            <MessagesChart />
-            <Conversations />
+            <MessagesChart weekly={weekly} />
+            <Conversations conversations={conversations} />
           </div>
 
-          <TemplatesTable />
+          <TemplatesTable templates={templates} />
 
           <footer className="foot">
-            Demo data. Connect the WhatsApp Cloud API to show live metrics.
+            {source === "live"
+              ? "Live data from the API."
+              : "Demo data. Start the backend (docker compose up) to show live metrics."}
           </footer>
         </main>
       </div>

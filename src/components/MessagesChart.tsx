@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { weekly } from "../data";
+import type { DayPoint } from "../data";
 
 const W = 560;
 const H = 220;
@@ -7,8 +7,10 @@ const PAD_X = 8;
 const PAD_TOP = 24;
 const PAD_BOTTOM = 28;
 
-export default function MessagesChart() {
+export default function MessagesChart({ weekly }: { weekly: DayPoint[] }) {
   const [hover, setHover] = useState<number | null>(null);
+
+  if (weekly.length === 0) return null;
 
   const max = Math.max(...weekly.map((d) => d.sent));
   const total = weekly.reduce((a, d) => a + d.sent, 0).toLocaleString();
@@ -41,7 +43,7 @@ export default function MessagesChart() {
         className="chart"
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`Bar chart of messages sent and read per day. Peak ${max} on Friday.`}
+        aria-label={`Bar chart of messages sent and read per day. Peak ${max} sent in a day.`}
       >
         {/* gridlines */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => {
